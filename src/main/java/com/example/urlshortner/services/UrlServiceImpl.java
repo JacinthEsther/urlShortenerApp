@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,7 +25,7 @@ import java.util.regex.Pattern;
 public class UrlServiceImpl implements UrlService {
 
     String encodedUrl="";
-@Autowired
+    @Autowired
     private UrlRepository urlRepository;
 
     @Override
@@ -48,12 +49,10 @@ public class UrlServiceImpl implements UrlService {
 
                response.setOriginalUrl(savedUrl.getOriginalUrl());
                response.setShortenedUrl(savedUrl.getShortenedUrl());
-//               log.info("encoded url "+encodedUrl);
 
            }
         return response;
         }
-               log.info(response.getOriginalUrl());
 
         throw new UrlException("url cannot be empty");
     }
@@ -75,7 +74,6 @@ public class UrlServiceImpl implements UrlService {
             }
 
             Matcher m = p.matcher(url);
-
 
             return m.matches();
         }
@@ -100,12 +98,28 @@ public class UrlServiceImpl implements UrlService {
     @Override
     public void deleteShortLink(Url url) {
 
+    Optional<Url> foundUrl= Optional.ofNullable(urlRepository.findUrlByShortenedUrl(url.getShortenedUrl()));
+     if (foundUrl.isPresent()){
+         urlRepository.delete(foundUrl.get());
+     }
+     else {
+         Optional<Url> foundUrl1= Optional.ofNullable(urlRepository.findByOriginalUrl(url.getOriginalUrl()));
+         foundUrl1.ifPresent(value -> urlRepository.delete(value));
+     }
+    }
+
+    @Override
+    public String updateShortLink(String shortLink) {
+        Optional<Url> foundUrl = Optional.ofNullable(urlRepository.findUrlByShortenedUrl(shortLink));
+
+        foundUrl.ifPresent(url -> url.setShortenedUrl(shortLink));
+
+       return foundUrl.get().getShortenedUrl();
     }
 
     @Override
     public String getDecodedUrl(String url) {
         Url urls = urlRepository.findUrlByShortenedUrl(url);
-        log.info(urls.getOriginalUrl()+"urlssss...........");
        return urls.getOriginalUrl();
 
     }

@@ -11,5 +11,7 @@ public interface UrlService {
     String getEncodedUrl(String url);
     void deleteShortLink(Url url);
 
+    String updateShortLink(String shortLink);
+
     String getDecodedUrl(String url);
 }
