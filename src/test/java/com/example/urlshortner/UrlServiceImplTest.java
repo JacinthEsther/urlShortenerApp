@@ -7,6 +7,8 @@ import com.example.urlshortner.models.Url;
 import com.example.urlshortner.repositories.UrlRepository;
 import com.example.urlshortner.services.UrlService;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,6 +21,12 @@ public class UrlServiceImplTest {
     @Autowired
     private UrlService service;
 
+    UrlDto request;
+    @BeforeEach
+    void setUp(){
+        request  = new UrlDto();
+        request.setUrl("https://www.facebook.com");
+    }
 
     @Test
     void testToSetAndGetUrl(){
@@ -27,19 +35,21 @@ public class UrlServiceImplTest {
         assertEquals("www.facebook.com", url.getOriginalUrl());
     }
 
-    @Test
-    void shortLinkCanBeGeneratedTest() throws UrlException {
-      UrlDto request = new UrlDto();
-      request.setUrl("https://www.facebook.com");
-      UrlResponse response = service.generateShortLink(request);
-
-      assertNotNull(response.getShortenedUrl());
-    }
+//    @Test
+//    void shortLinkCanBeGeneratedTest() throws UrlException {
+//
+//      UrlResponse response = service.generateShortLink(request);
+//
+//       service.getEncodedUrl("https://www.facebook.com");
+//
+//      assertNotNull(response.getShortenedUrl());
+////      assertEquals(response.getShortenedUrl(), getShortUrl);
+//
+//    }
 
     @Test
     void testToGetOriginalUrl() throws UrlException {
-        UrlDto request = new UrlDto();
-        request.setUrl("https://www.facebook.com");
+
         UrlResponse response = service.generateShortLink(request);
 
         assertEquals("https://www.facebook.com" , response.getOriginalUrl());
@@ -60,9 +70,19 @@ public class UrlServiceImplTest {
    }
 
    @Test
-    void testThatUpdateUrl(){
+    void testThatUpdateUrl() throws UrlException {
 
+       UrlResponse response = service.generateShortLink(request);
+
+       String shortUrl = service.updateShortLink(response.getShortenedUrl(),"friend");
+       String url = service.getEncodedUrl("https://www.facebook.com");
+       assertEquals(shortUrl, url);
    }
 
-
+    @AfterEach
+    void tearDown() {
+        Url url = new Url();
+        url.setOriginalUrl("https://www.facebook.com");
+        service.delete(url);
+    }
 }

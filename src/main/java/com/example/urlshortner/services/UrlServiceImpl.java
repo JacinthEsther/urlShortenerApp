@@ -31,29 +31,34 @@ public class UrlServiceImpl implements UrlService {
     public UrlResponse generateShortLink(UrlDto urlDto) throws UrlException {
         UrlResponse response = new UrlResponse();
 
-        if(!StringUtils.isEmpty(urlDto.getUrl())) {
-           if (!isUrlValid(urlDto.getUrl())) {
+//       Optional <Url> checkUrl= Optional.ofNullable(urlRepository.findUrlByOriginalUrl(urlDto.getUrl()));
+//       if(checkUrl.isPresent()){
+//           getEncodedUrl(urlDto.getUrl());
+//       }
 
-               throw new UrlException("Not a Valid Url");
-           }
-           else {
-               String encodedUrl= encodeUrl(urlDto.getUrl());
-               Url url= new Url();
-               url.setOriginalUrl(urlDto.getUrl());
-               url.setCreationDate(LocalDateTime.now());
-               url.setShortenedUrl(encodedUrl);
+           if (!StringUtils.isEmpty(urlDto.getUrl())) {
+               if (!isUrlValid(urlDto.getUrl())) {
 
-               Url savedUrl = urlRepository.save(url);
+                   throw new UrlException("Not a Valid Url");
+               } else {
+                   String encodedUrl = encodeUrl(urlDto.getUrl());
+                   Url url = new Url();
+                   url.setOriginalUrl(urlDto.getUrl());
+                   url.setCreationDate(LocalDateTime.now());
+                   url.setShortenedUrl(encodedUrl);
+
+                   Url savedUrl = urlRepository.save(url);
 
 
-               response.setOriginalUrl(savedUrl.getOriginalUrl());
-               response.setShortenedUrl(savedUrl.getShortenedUrl());
+                   response.setOriginalUrl(savedUrl.getOriginalUrl());
+                   response.setShortenedUrl(savedUrl.getShortenedUrl());
 
-           }
-        return response;
-        }
+               }
+               return response;
 
+       }
         throw new UrlException("url cannot be empty");
+
     }
 
 
@@ -86,7 +91,7 @@ public class UrlServiceImpl implements UrlService {
 
     @Override
     public String getEncodedUrl(String url) {
-   Url urls = urlRepository.findByOriginalUrl(url);
+   Url urls = urlRepository.findUrlByOriginalUrl(url);
    return urls.getShortenedUrl();
     }
 
@@ -98,7 +103,7 @@ public class UrlServiceImpl implements UrlService {
          urlRepository.delete(foundUrl.get());
      }
      else {
-         Optional<Url> foundUrl1= Optional.ofNullable(urlRepository.findByOriginalUrl(url));
+         Optional<Url> foundUrl1= Optional.ofNullable(urlRepository.findUrlByOriginalUrl(url));
          if(foundUrl1.isPresent()) {
              urlRepository.delete(foundUrl.get());
          }
@@ -107,12 +112,18 @@ public class UrlServiceImpl implements UrlService {
     }
 
     @Override
-    public String updateShortLink(String shortLink) {
+    public String updateShortLink(String shortLink, String customizedLink) throws UrlException {
         Optional<Url> foundUrl = Optional.ofNullable(urlRepository.findUrlByShortenedUrl(shortLink));
 
-        foundUrl.ifPresent(url -> url.setShortenedUrl(shortLink));
-//        else throw new UrlException()
-       return foundUrl.get().getShortenedUrl();
+        if(foundUrl.isEmpty()){
+            throw new UrlException("url");
+        }
+
+        foundUrl.get().setShortenedUrl(customizedLink);
+
+        urlRepository.save(foundUrl.get());
+        return foundUrl.get().getShortenedUrl();
+
     }
 
     @Override
@@ -120,6 +131,17 @@ public class UrlServiceImpl implements UrlService {
         Url urls = urlRepository.findUrlByShortenedUrl(url);
        return urls.getOriginalUrl();
 
+    }
+
+    @Override
+    public void delete(Url url) {
+        urlRepository.delete(url);
+    }
+
+    @Override
+    public void deleteUser(UrlDto request) {
+        Url url = urlRepository.findUrlByOriginalUrl(request.getUrl());
+        urlRepository.delete(url);
     }
 
 

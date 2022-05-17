@@ -22,6 +22,7 @@ public class Url {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
     private Long id;
+
     @URL
     private String originalUrl;
     private String shortenedUrl;

@@ -56,8 +56,9 @@ public class UrlController {
 
 
     @PatchMapping("/customiseUrl")
-    public ResponseEntity<?> customiseShortLink(@RequestBody String shortLink){
-        return new ResponseEntity<>(urlService.updateShortLink(shortLink), HttpStatus.ACCEPTED);
+    public ResponseEntity<?> customiseShortLink(@RequestParam String shortLink, @RequestParam String customiseUrl)
+            throws UrlException {
+        return new ResponseEntity<>(urlService.updateShortLink(shortLink,customiseUrl), HttpStatus.ACCEPTED);
     }
 
 }

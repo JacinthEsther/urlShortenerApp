@@ -11,7 +11,11 @@ public interface UrlService {
     String getEncodedUrl(String url);
     void deleteShortLink(String url) throws UrlException;
 
-    String updateShortLink(String shortLink);
+    String updateShortLink(String shortLink, String customizedLink) throws UrlException;
 
     String getDecodedUrl(String url);
+
+    void delete(Url url);
+
+    void deleteUser(UrlDto request);
 }
