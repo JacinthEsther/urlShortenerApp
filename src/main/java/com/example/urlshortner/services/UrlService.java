@@ -9,7 +9,7 @@ public interface UrlService {
     UrlResponse generateShortLink(UrlDto urlDto) throws UrlException;
 
     String getEncodedUrl(String url);
-    void deleteShortLink(Url url);
+    void deleteShortLink(String url) throws UrlException;
 
     String updateShortLink(String shortLink);
 

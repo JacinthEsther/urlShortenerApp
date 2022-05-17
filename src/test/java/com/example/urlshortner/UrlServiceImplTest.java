@@ -11,8 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 public class UrlServiceImplTest {
@@ -29,20 +28,41 @@ public class UrlServiceImplTest {
     }
 
     @Test
-    void shortLinkCanBeGenerated() throws UrlException {
+    void shortLinkCanBeGeneratedTest() throws UrlException {
       UrlDto request = new UrlDto();
       request.setUrl("https://www.facebook.com");
       UrlResponse response = service.generateShortLink(request);
 
-        assertNotNull(response.getShortenedUrl());
+      assertNotNull(response.getShortenedUrl());
     }
 
     @Test
-    void TestToGetOriginalUrl() throws UrlException {
+    void testToGetOriginalUrl() throws UrlException {
         UrlDto request = new UrlDto();
         request.setUrl("https://www.facebook.com");
         UrlResponse response = service.generateShortLink(request);
 
         assertEquals("https://www.facebook.com" , response.getOriginalUrl());
     }
+
+   @Test
+   void invalidUrlThrowsExceptionTest(){
+       UrlDto request = new UrlDto();
+       request.setUrl("htt://www.facebook.com");
+      assertThrows(UrlException.class,()->service.generateShortLink(request) );
+   }
+
+   @Test
+    void testThatEmptyUrlCannotBeInputted(){
+       UrlDto request = new UrlDto();
+       request.setUrl(" ");
+       assertThrows(UrlException.class,()->service.generateShortLink(request) );
+   }
+
+   @Test
+    void testThatUpdateUrl(){
+
+   }
+
+
 }

@@ -8,7 +8,6 @@ import com.example.urlshortner.repositories.UrlRepository;
 import com.google.common.hash.Hashing;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,14 +68,10 @@ public class UrlServiceImpl implements UrlService {
 
             Pattern p = Pattern.compile(regex);
 
-            if (url == null) {
-                return false;
-            }
-
             Matcher m = p.matcher(url);
 
-            return m.matches();
-        }
+        return m.matches();
+    }
 
     private String encodeUrl(String url) {
 
@@ -96,15 +91,18 @@ public class UrlServiceImpl implements UrlService {
     }
 
     @Override
-    public void deleteShortLink(Url url) {
+    public void deleteShortLink(String url) throws UrlException {
 
-    Optional<Url> foundUrl= Optional.ofNullable(urlRepository.findUrlByShortenedUrl(url.getShortenedUrl()));
+    Optional<Url> foundUrl= Optional.ofNullable(urlRepository.findUrlByShortenedUrl(url));
      if (foundUrl.isPresent()){
          urlRepository.delete(foundUrl.get());
      }
      else {
-         Optional<Url> foundUrl1= Optional.ofNullable(urlRepository.findByOriginalUrl(url.getOriginalUrl()));
-         foundUrl1.ifPresent(value -> urlRepository.delete(value));
+         Optional<Url> foundUrl1= Optional.ofNullable(urlRepository.findByOriginalUrl(url));
+         if(foundUrl1.isPresent()) {
+             urlRepository.delete(foundUrl.get());
+         }
+      else throw new UrlException("url not found");
      }
     }
 
@@ -113,7 +111,7 @@ public class UrlServiceImpl implements UrlService {
         Optional<Url> foundUrl = Optional.ofNullable(urlRepository.findUrlByShortenedUrl(shortLink));
 
         foundUrl.ifPresent(url -> url.setShortenedUrl(shortLink));
-
+//        else throw new UrlException()
        return foundUrl.get().getShortenedUrl();
     }
 

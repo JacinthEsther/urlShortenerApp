@@ -31,22 +31,33 @@ public class UrlController {
         }
     }
 
-    @GetMapping("/{originalUrl}")
-    public ResponseEntity <?> redirectToOriginalUrl(@PathVariable String originalUrl){
-        return new ResponseEntity<>(urlService.getDecodedUrl(originalUrl), HttpStatus.FOUND);
+    @GetMapping("/{shortUrl}")
+    public ResponseEntity <?> redirectToOriginalUrl(@PathVariable String shortUrl){
+        return new ResponseEntity<>(urlService.getDecodedUrl(shortUrl), HttpStatus.FOUND);
     }
 
-    @GetMapping("/get/{originalUrl}")
-    public void getFullUrl(HttpServletResponse response, @PathVariable String originalUrl) throws IOException {
-        response.sendRedirect(urlService.getDecodedUrl(originalUrl));
+    @GetMapping("/get/{shortUrl}")
+    public void getFullUrl(HttpServletResponse response, @PathVariable String shortUrl) throws IOException {
+        response.sendRedirect(urlService.getDecodedUrl(shortUrl));
     }
 
-    @GetMapping("/get/get/{originalUrl}")
-    public RedirectView getFullUrl1(@PathVariable String originalUrl){
+    @GetMapping("/get/get/{shortUrl}")
+    public RedirectView getFullUrl1(@PathVariable String shortUrl){
         RedirectView redirectView = new RedirectView();
 
-       redirectView.setUrl( urlService.getDecodedUrl(originalUrl));
+       redirectView.setUrl( urlService.getDecodedUrl(shortUrl));
        return redirectView;
+    }
+
+    @DeleteMapping("/{url}")
+    public void deleteUrl(@PathVariable String url) throws UrlException {
+        urlService.deleteShortLink(url);
+    }
+
+
+    @PatchMapping("/customiseUrl")
+    public ResponseEntity<?> customiseShortLink(@RequestBody String shortLink){
+        return new ResponseEntity<>(urlService.updateShortLink(shortLink), HttpStatus.ACCEPTED);
     }
 
 }
